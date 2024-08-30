@@ -200,10 +200,7 @@ HAVING COUNT(name) > 1;
 | cnna       | 3         |
 | sql        | 2         |
 
-# SQL Joins: Detailed Explanation
-
-(Explanation of SQL joins such as INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL JOIN, CROSS JOIN, and SELF JOIN, as previously described)
-
+------------------------------------------
 
 # SQL Joins: Detailed Explanation
 
