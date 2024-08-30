@@ -454,3 +454,148 @@ INNER JOIN Managers ON Employees.FirstName = Managers.FirstName AND Employees.La
 |-----------|----------|
 | John      | Doe      |
 | Jane      | Smith    |
+
+
+# SQL Subqueries and Joins:
+
+## 1. Subquerying with Semi-Joins and Anti-Joins
+- **Semi-Joins**: Returns rows from the first table where one or more matches are found in the second table.
+  
+  **Example**: Find all employees who have managed projects.
+  ```sql
+  SELECT DISTINCT EmployeeID
+  FROM Employees e
+  WHERE EXISTS (
+      SELECT 1 
+      FROM Projects p 
+      WHERE p.ManagerID = e.EmployeeID
+  );
+  ```
+
+- **Anti-Joins**: Returns rows from the first table where no matches are found in the second table.
+
+  **Example**: Find all employees who have not managed any projects.
+  ```sql
+  SELECT DISTINCT EmployeeID
+  FROM Employees e
+  WHERE NOT EXISTS (
+      SELECT 1 
+      FROM Projects p 
+      WHERE p.ManagerID = e.EmployeeID
+  );
+  ```
+
+## 2. Multiple WHERE Clauses
+- SQL allows multiple conditions in the `WHERE` clause using logical operators like `AND`, `OR`, and `NOT`.
+  
+  **Example**: Find employees who work in the "Sales" department and have a salary greater than $50,000.
+  ```sql
+  SELECT *
+  FROM Employees
+  WHERE Department = 'Sales' 
+  AND Salary > 50000;
+  ```
+
+## 3. Semi-Join
+- A semi-join checks for the existence of a relationship between two tables, returning rows from the first table where a corresponding match is found in the second table.
+
+  **Example**: List all departments that have employees.
+  ```sql
+  SELECT DepartmentName
+  FROM Departments d
+  WHERE EXISTS (
+      SELECT 1 
+      FROM Employees e 
+      WHERE e.DepartmentID = d.DepartmentID
+  );
+  ```
+
+## 4. Diagnosing Problems Using Anti-Joins
+- Anti-joins are useful in diagnosing issues like finding records in one table that do not have corresponding records in another.
+
+  **Example**: Find all orders that have not been shipped.
+  ```sql
+  SELECT OrderID
+  FROM Orders o
+  WHERE NOT EXISTS (
+      SELECT 1 
+      FROM Shipments s 
+      WHERE s.OrderID = o.OrderID
+  );
+  ```
+
+## 5. Subqueries Inside WHERE and SELECT
+- Subqueries within the `WHERE` clause filter results based on another query’s output.
+
+  **Example in WHERE**: List employees whose salary is greater than the average salary in their department.
+  ```sql
+  SELECT EmployeeID, FirstName, LastName
+  FROM Employees e
+  WHERE Salary > (
+      SELECT AVG(Salary)
+      FROM Employees 
+      WHERE DepartmentID = e.DepartmentID
+  );
+  ```
+
+- Subqueries in the `SELECT` clause allow calculating additional information related to each row.
+
+  **Example in SELECT**: Show the total number of employees in each department.
+  ```sql
+  SELECT DepartmentName, 
+         (SELECT COUNT(*) 
+          FROM Employees e 
+          WHERE e.DepartmentID = d.DepartmentID) AS EmployeeCount
+  FROM Departments d;
+  ```
+
+## 6. Subquery Inside WHERE
+- A subquery within the `WHERE` clause enables dynamic filtering based on another query's result.
+
+  **Example**: Retrieve all employees who have the highest salary in their department.
+  ```sql
+  SELECT EmployeeID, FirstName, LastName
+  FROM Employees e
+  WHERE Salary = (
+      SELECT MAX(Salary)
+      FROM Employees 
+      WHERE DepartmentID = e.DepartmentID
+  );
+  ```
+
+## 7. Subquery Inside SELECT
+- A subquery in the `SELECT` clause calculates additional metrics related to the main query.
+
+  **Example**: Display each employee’s name along with the number of projects they have managed.
+  ```sql
+  SELECT FirstName, LastName, 
+         (SELECT COUNT(*) 
+          FROM Projects p 
+          WHERE p.ManagerID = e.EmployeeID) AS ProjectCount
+  FROM Employees e;
+  ```
+
+## 8. Subquery Inside FROM
+- A subquery in the `FROM` clause acts like a temporary table that can be joined with other tables.
+
+  **Example**: Find the average salary by department and compare it against the company’s average salary.
+  ```sql
+  SELECT DepartmentID, AVG(Salary) AS AvgDeptSalary
+  FROM (SELECT DepartmentID, Salary 
+        FROM Employees) AS DeptSalaries
+  GROUP BY DepartmentID;
+  ```
+
+## 9. Subqueries Inside FROM
+- Combining multiple subqueries in the `FROM` clause for complex operations.
+
+  **Example**: Combine average salary calculations with other metrics in the same query.
+  ```sql
+  SELECT d.DepartmentName, ds.AvgDeptSalary, COUNT(e.EmployeeID) AS EmployeeCount
+  FROM Departments d
+  JOIN (SELECT DepartmentID, AVG(Salary) AS AvgDeptSalary
+        FROM Employees
+        GROUP BY DepartmentID) ds ON d.DepartmentID = ds.DepartmentID
+  JOIN Employees e ON e.DepartmentID = d.DepartmentID
+  GROUP BY d.DepartmentName, ds.AvgDeptSalary;
+  ```
