@@ -331,3 +331,126 @@ ON A.manager_id = B.employee_id;
 | 4           | 2          |
 
 -----------------------
+
+# SQL Set Operations: UNION, UNION ALL, INTERSECT, and EXCEPT
+
+## 1. UNION
+- **Description**: Combines the result sets of two or more queries and removes duplicate rows.
+- **Usage**: When you want to merge the results from multiple queries while excluding duplicates.
+
+### Example
+Consider two tables, `Employees` and `Managers`:
+
+| EmployeeID | FirstName | LastName | DepartmentID |
+|------------|-----------|----------|--------------|
+| 1          | John      | Doe      | 10           |
+| 2          | Jane      | Smith    | 20           |
+| 3          | Jim       | Brown    | 30           |
+| 4          | Jake      | White    | 40           |
+
+| ManagerID  | FirstName | LastName | DepartmentID |
+|------------|-----------|----------|--------------|
+| 1          | John      | Doe      | 10           |
+| 2          | Jane      | Smith    | 20           |
+| 5          | Susan     | Green    | 50           |
+| 6          | Tom       | Black    | 60           |
+
+### SQL Query
+```sql
+SELECT FirstName, LastName FROM Employees
+UNION
+SELECT FirstName, LastName FROM Managers;
+```
+
+*Result*: The output would be a list of unique `FirstName` and `LastName` values from both tables:
+
+| FirstName | LastName |
+|-----------|----------|
+| John      | Doe      |
+| Jane      | Smith    |
+| Jim       | Brown    |
+| Jake      | White    |
+| Susan     | Green    |
+| Tom       | Black    |
+
+
+## 2. UNION ALL
+- **Description**: Combines the result sets of two or more queries, including all duplicate rows.
+- **Usage**: When you want to merge results from multiple queries and include all rows, even duplicates.
+
+### SQL Query
+```sql
+SELECT FirstName, LastName FROM Employees
+UNION ALL
+SELECT FirstName, LastName FROM Managers;
+```
+
+*Result*: The output would be a list of all `FirstName` and `LastName` values, including duplicates:
+
+| FirstName | LastName |
+|-----------|----------|
+| John      | Doe      |
+| Jane      | Smith    |
+| Jim       | Brown    |
+| Jake      | White    |
+| John      | Doe      |
+| Jane      | Smith    |
+| Susan     | Green    |
+| Tom       | Black    |
+
+
+## 3. INTERSECT
+- **Description**: Returns only the rows that are common between the result sets of two queries.
+- **Usage**: When you want to find common rows between multiple queries.
+
+### SQL Query
+```sql
+SELECT FirstName, LastName FROM Employees
+INTERSECT
+SELECT FirstName, LastName FROM Managers;
+```
+
+*Result*: The output would be a list of `FirstName` and `LastName` values that appear in both tables:
+
+| FirstName | LastName |
+|-----------|----------|
+| John      | Doe      |
+| Jane      | Smith    |
+
+
+## 4. EXCEPT
+- **Description**: Returns rows from the first query that do not appear in the result set of the second query.
+- **Usage**: When you want to find rows that exist in one query but not in the other.
+
+### SQL Query
+```sql
+SELECT FirstName, LastName FROM Employees
+EXCEPT
+SELECT FirstName, LastName FROM Managers;
+```
+
+*Result*: The output would be a list of `FirstName` and `LastName` values from the `Employees` table that are not in the `Managers` table:
+
+| FirstName | LastName |
+|-----------|----------|
+| Jim       | Brown    |
+| Jake      | White    |
+
+
+## Comparison: INTERSECT vs. INNER JOIN
+- **INTERSECT**: Returns only the common values between two queries based on the selected columns.
+- **INNER JOIN**: Joins two tables based on a specific condition, allowing you to return additional columns that are not part of the intersection.
+
+### Example of INNER JOIN
+```sql
+SELECT Employees.FirstName, Employees.LastName
+FROM Employees
+INNER JOIN Managers ON Employees.FirstName = Managers.FirstName AND Employees.LastName = Managers.LastName;
+```
+
+*Result*: This would return similar results as `INTERSECT`, but could also include additional columns from either table:
+
+| FirstName | LastName |
+|-----------|----------|
+| John      | Doe      |
+| Jane      | Smith    |
