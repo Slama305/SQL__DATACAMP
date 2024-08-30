@@ -202,7 +202,7 @@ HAVING COUNT(name) > 1;
 
 ------------------------------------------
 
-# SQL Joins: Detailed Explanation
+# SQL Joins:
 
 ## 1. INNER JOIN
 **Description:** Selects only the matching rows from both tables based on the specified condition.
