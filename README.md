@@ -975,3 +975,164 @@ LIMIT 1;
 | 10           |
 
 ---
+# Data Manipulation in SQL
+
+## 1. **CASE Statements**
+
+The `CASE` statement in SQL allows you to perform conditional logic within your queries, similar to an "if-else" statement in programming languages. It is often used to create new calculated fields or to modify existing values based on certain conditions.
+
+#### **Syntax and Usage**
+
+```sql
+CASE
+  WHEN condition1 THEN result1
+  WHEN condition2 THEN result2
+  ELSE result3
+END AS new_column_name
+```
+
+You can also use `CASE` statements inside aggregate functions like `AVG()`, `SUM()`, etc., to calculate conditional aggregates.
+
+#### **Example Usage with a Table**
+
+Suppose you have a `Sales` table:
+
+| OrderID | Customer | Product  | Quantity | Price |
+|---------|----------|----------|----------|-------|
+| 1       | Alice    | Laptop   | 2        | 1000  |
+| 2       | Bob      | Smartphone| 5       | 300   |
+| 3       | Alice    | Tablet   | 1        | 400   |
+| 4       | John     | Laptop   | 1        | 950   |
+
+You want to create a new column that shows the "Order Type" based on the product:
+
+```sql
+SELECT 
+  OrderID,
+  Customer,
+  Product,
+  Quantity,
+  Price,
+  CASE 
+    WHEN Product = 'Laptop' THEN 'High Value'
+    WHEN Product = 'Smartphone' THEN 'Medium Value'
+    ELSE 'Low Value'
+  END AS OrderType
+FROM Sales;
+```
+
+#### **Conditional Aggregation Example**
+
+If you want to find the average price for only the "Laptop" orders:
+
+```sql
+SELECT 
+  AVG(
+    CASE 
+      WHEN Product = 'Laptop' THEN Price 
+      ELSE NULL 
+    END
+  ) AS AvgLaptopPrice
+FROM Sales;
+```
+
+### 2. **Simple vs. Correlated Subqueries**
+
+#### **Simple Subquery**
+
+A simple subquery (or nested query) is a query within another query. The subquery is executed once, and its result is used by the outer query. A simple subquery does not reference columns from the outer query.
+
+**Example:**
+
+Find the customers who have placed an order with the maximum price:
+
+```sql
+SELECT Customer
+FROM Sales
+WHERE Price = (SELECT MAX(Price) FROM Sales);
+```
+
+#### **Correlated Subquery**
+
+A correlated subquery is a subquery that references a column from the outer query. It is evaluated once for each row processed by the outer query.
+
+**Example:**
+
+Find all customers who have made more than one purchase:
+
+```sql
+SELECT DISTINCT Customer
+FROM Sales s1
+WHERE 1 < (
+  SELECT COUNT(*)
+  FROM Sales s2
+  WHERE s2.Customer = s1.Customer
+);
+```
+
+### 3. **Common Table Expressions (CTEs)**
+
+A Common Table Expression (CTE) is a temporary result set that you can reference within a `SELECT`, `INSERT`, `UPDATE`, or `DELETE` statement. CTEs make queries more readable and easier to maintain, especially when you have complex queries or multiple layers of nested subqueries.
+
+#### **Syntax**
+
+```sql
+WITH cte_name AS (
+  SELECT ...
+  FROM ...
+)
+SELECT ...
+FROM cte_name;
+```
+
+#### **Example Usage with a Single CTE**
+
+Suppose we want to find the total sales by each customer:
+
+```sql
+WITH CustomerSales AS (
+  SELECT Customer, SUM(Quantity * Price) AS TotalSales
+  FROM Sales
+  GROUP BY Customer
+)
+SELECT * 
+FROM CustomerSales;
+```
+
+#### **Multiple CTEs Example**
+
+You can define multiple CTEs by separating them with commas:
+
+```sql
+WITH 
+ProductSales AS (
+  SELECT Product, SUM(Quantity) AS TotalQuantity
+  FROM Sales
+  GROUP BY Product
+),
+HighValueOrders AS (
+  SELECT OrderID, Customer, Product
+  FROM Sales
+  WHERE Product = 'Laptop'
+)
+SELECT p.Product, p.TotalQuantity, h.Customer
+FROM ProductSales p
+JOIN HighValueOrders h ON p.Product = h.Product;
+```
+
+### **Use Cases**
+
+1. **CASE Statements:**
+   - Create derived columns based on conditional logic.
+   - Conditional aggregation (e.g., counting or summing only rows that meet certain criteria).
+
+2. **Subqueries:**
+   - Simple Subqueries: Used to filter results or perform calculations where the results are not dependent on the outer query.
+   - Correlated Subqueries: Useful when the subquery needs information from the outer query to execute correctly (e.g., row-by-row comparisons).
+
+3. **CTEs:**
+   - Breaking down complex queries into more manageable parts.
+   - Improving query readability and maintainability.
+   - Recursion (e.g., hierarchical or tree-like data).
+
+
