@@ -1389,9 +1389,7 @@ These aggregate functions can also be used with window functions to calculate cu
   **Result**:
 
   | SaleID | Employee | Amount | CumulativeSum | MaxAmount |
-  |--------
-
-|----------|--------|---------------|-----------|
+  |--------|----------|--------|---------------|-----------|
   | 1      | John     | 500    | 500           | 500       |
   | 3      | John     | 400    | 900           | 500       |
   | 2      | Jane     | 700    | 700           | 700       |
