@@ -1134,5 +1134,293 @@ JOIN HighValueOrders h ON p.Product = h.Product;
    - Breaking down complex queries into more manageable parts.
    - Improving query readability and maintainability.
    - Recursion (e.g., hierarchical or tree-like data).
+     
 
+-------------------------------------
+### Window Functions in SQL
+
+Window functions are a powerful feature in SQL that allow you to perform calculations across a set of table rows that are related to the current row. They are used extensively for analytics and reporting.
+
+#### 1. **ROW_NUMBER()**
+
+This function assigns a unique sequential integer to rows within a partition of a result set, starting at 1.
+
+- **Usage**: Useful for generating row numbers or rankings.
+  
+- **Syntax**:
+  ```sql
+  ROW_NUMBER() OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  Given a table `sales`:
+
+  | SaleID | Employee | Amount |
+  |--------|----------|--------|
+  | 1      | John     | 500    |
+  | 2      | Jane     | 700    |
+  | 3      | John     | 400    |
+  | 4      | Jane     | 600    |
+
+  We want to assign row numbers to each employee’s sales:
+
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         ROW_NUMBER() OVER (PARTITION BY Employee ORDER BY Amount DESC) AS RowNum
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | RowNum |
+  |--------|----------|--------|--------|
+  | 2      | Jane     | 700    | 1      |
+  | 4      | Jane     | 600    | 2      |
+  | 1      | John     | 500    | 1      |
+  | 3      | John     | 400    | 2      |
+
+#### 2. **LAG()**
+
+This function provides access to a row at a specified physical offset before the current row within a result set.
+
+- **Usage**: Useful for comparing a value with a previous row’s value.
+
+- **Syntax**:
+  ```sql
+  LAG(column, offset, default_value) OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  Continuing with the `sales` table:
+
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         LAG(Amount, 1, 0) OVER (PARTITION BY Employee ORDER BY Amount DESC) AS PreviousSale
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | PreviousSale |
+  |--------|----------|--------|--------------|
+  | 2      | Jane     | 700    | 0            |
+  | 4      | Jane     | 600    | 700          |
+  | 1      | John     | 500    | 0            |
+  | 3      | John     | 400    | 500          |
+
+#### 3. **LEAD()**
+
+This function provides access to a row at a specified physical offset after the current row within a result set.
+
+- **Usage**: Useful for comparing a value with a following row’s value.
+
+- **Syntax**:
+  ```sql
+  LEAD(column, offset, default_value) OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  Continuing with the `sales` table:
+
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         LEAD(Amount, 1, 0) OVER (PARTITION BY Employee ORDER BY Amount DESC) AS NextSale
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | NextSale |
+  |--------|----------|--------|----------|
+  | 2      | Jane     | 700    | 600      |
+  | 4      | Jane     | 600    | 0        |
+  | 1      | John     | 500    | 400      |
+  | 3      | John     | 400    | 0        |
+
+#### 4. **FIRST_VALUE()**
+
+This function returns the first value in an ordered set of values.
+
+- **Usage**: Useful when you need to retrieve the earliest value in a set.
+
+- **Syntax**:
+  ```sql
+  FIRST_VALUE(column) OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         FIRST_VALUE(Amount) OVER (PARTITION BY Employee ORDER BY Amount DESC) AS FirstSale
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | FirstSale |
+  |--------|----------|--------|-----------|
+  | 2      | Jane     | 700    | 700       |
+  | 4      | Jane     | 600    | 700       |
+  | 1      | John     | 500    | 500       |
+  | 3      | John     | 400    | 500       |
+
+#### 5. **LAST_VALUE()**
+
+This function returns the last value in an ordered set of values.
+
+- **Usage**: Useful for retrieving the most recent value in a set.
+
+- **Syntax**:
+  ```sql
+  LAST_VALUE(column) OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         LAST_VALUE(Amount) OVER (PARTITION BY Employee ORDER BY Amount ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS LastSale
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | LastSale |
+  |--------|----------|--------|----------|
+  | 2      | Jane     | 700    | 600      |
+  | 4      | Jane     | 600    | 600      |
+  | 1      | John     | 500    | 400      |
+  | 3      | John     | 400    | 400      |
+
+#### 6. **RANK()**
+
+This function assigns a rank to each row within a partition of a result set. The rank starts at 1 and continues based on the ordering, but it leaves gaps in rank when there are ties.
+
+- **Usage**: Useful for ranking data with gaps for tied values.
+
+- **Syntax**:
+  ```sql
+  RANK() OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         RANK() OVER (PARTITION BY Employee ORDER BY Amount DESC) AS Rank
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | Rank |
+  |--------|----------|--------|------|
+  | 2      | Jane     | 700    | 1    |
+  | 4      | Jane     | 600    | 2    |
+  | 1      | John     | 500    | 1    |
+  | 3      | John     | 400    | 2    |
+
+#### 7. **DENSE_RANK()**
+
+Similar to `RANK()`, but without gaps in the rank values.
+
+- **Usage**: Useful for ranking data without gaps for tied values.
+
+- **Syntax**:
+  ```sql
+  DENSE_RANK() OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         DENSE_RANK() OVER (PARTITION BY Employee ORDER BY Amount DESC) AS DenseRank
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | DenseRank |
+  |--------|----------|--------|-----------|
+  | 2      | Jane     | 700    | 1         |
+  | 4      | Jane     | 600    | 2         |
+  | 1      | John     | 500    | 1         |
+  | 3      | John     | 400    | 2         |
+
+#### 8. **NTILE()**
+
+This function distributes rows of an ordered partition into a specified number of roughly equal groups.
+
+- **Usage**: Useful for dividing data into buckets (e.g., quartiles).
+
+- **Syntax**:
+  ```sql
+  NTILE(num_buckets) OVER (PARTITION BY column ORDER BY column)
+  ```
+
+- **Example**:
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         NTILE(2) OVER (PARTITION BY Employee ORDER BY Amount DESC) AS NTile
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | NTile |
+  |--------|----------|--------|-------|
+  | 2      | Jane     | 700    | 1     |
+  | 4      | Jane     | 600    | 2     |
+  | 1      | John     | 500    | 1     |
+  | 3      | John     | 400    | 2     |
+
+#### 9. **MAX() and SUM()**
+
+These aggregate functions can also be used with window functions to calculate cumulative totals or maximums over a window of data.
+
+- **Usage**: Useful for cumulative totals or tracking maximum values over a series of rows.
+
+- **Example**:
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         SUM(Amount) OVER (PARTITION BY Employee ORDER BY SaleID) AS CumulativeSum,
+         MAX(Amount) OVER (PARTITION BY Employee ORDER BY SaleID) AS MaxAmount
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | CumulativeSum | MaxAmount |
+  |--------
+
+|----------|--------|---------------|-----------|
+  | 1      | John     | 500    | 500           | 500       |
+  | 3      | John     | 400    | 900           | 500       |
+  | 2      | Jane     | 700    | 700           | 700       |
+  | 4      | Jane     | 600    | 1300          | 700       |
+
+#### 10. **FRAMES: RANGE BETWEEN vs. ROWS BETWEEN**
+
+**RANGE** and **ROWS** are used to define a frame of rows in the result set to which the window function is applied.
+
+- **RANGE BETWEEN**: Defines a window based on the value range.
+  
+- **ROWS BETWEEN**: Defines a window based on the number of rows.
+
+- **Example**:
+  ```sql
+  SELECT SaleID, Employee, Amount, 
+         SUM(Amount) OVER (ORDER BY SaleID ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS RowSum,
+         SUM(Amount) OVER (ORDER BY SaleID RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS RangeSum
+  FROM sales;
+  ```
+
+  **Result**:
+
+  | SaleID | Employee | Amount | RowSum | RangeSum |
+  |--------|----------|--------|--------|----------|
+  | 1      | John     | 500    | 500    | 500      |
+  | 3      | John     | 400    | 900    | 900      |
+  | 2      | Jane     | 700    | 700    | 700      |
+  | 4      | Jane     | 600    | 1300   | 1300     |
+
+In this example, `RowSum` considers only the previous row and the current row, while `RangeSum` considers all rows from the start to the current row.
 
