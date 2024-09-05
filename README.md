@@ -66,7 +66,25 @@ SELECT column_name
 FROM table_name
 LIMIT 10;
 ```
+## COALESCE(... , ...)
+The `COALESCE` function in SQL is used to return the first non-null expression among its arguments. When you use `COALESCE(fieldname, 0)`, it checks the value of `fieldname`:
 
+- If `fieldname` is not `NULL`, it returns its value.
+- If `fieldname` is `NULL`, it returns `0` (the second argument).
+
+This is particularly useful when you want to ensure that you don't have `NULL` values in your result set, and instead, you have a default value like `0`.
+
+### Example:
+
+```sql
+SELECT COALESCE(total_sales, 0) AS adjusted_sales
+FROM sales_data;
+```
+
+In this example:
+- If `total_sales` is `NULL`, `adjusted_sales` will be `0`.
+- If `total_sales` has a value, `adjusted_sales` will have that value. 
+ 
 ## WHERE Condition
 Used to filter data based on specified conditions:
 
