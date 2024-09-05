@@ -221,7 +221,7 @@ ON customers.customer_id = orders.customer_id;
 | 1           | 101      |
 | 2           | 102      |
 
-## 2. USING Clause
+###  USING Clause
 **Description:** When joining on two identical column names, we can use the `USING` command followed by the shared column name.
 
 **Example:**
@@ -237,7 +237,7 @@ INNER JOIN orders USING (customer_id);
 | 1           | 101      |
 | 2           | 102      |
 
-## 3. LEFT JOIN
+## 2. LEFT JOIN
 **Description:** Returns all rows from the left table and the matching rows from the right table. The result is `NULL` from the right side if there is no match.
 
 **Example:**
@@ -255,7 +255,7 @@ ON customers.customer_id = orders.customer_id;
 | 2           | 102      |
 | 3           | NULL     |
 
-## 4. RIGHT JOIN
+## 3. RIGHT JOIN
 **Description:** Returns all rows from the right table and the matching rows from the left table. The result is `NULL` from the left side if there is no match.
 
 **Example:**
@@ -273,7 +273,7 @@ ON customers.customer_id = orders.customer_id;
 | 2           | 102      |
 | NULL        | 103      |
 
-## 5. FULL JOIN
+## 4. FULL JOIN
 **Description:** Returns all rows from both tables. It returns `NULL` on the side where there is no match.
 
 **Example:**
@@ -292,7 +292,7 @@ ON customers.customer_id = orders.customer_id;
 | 3           | NULL     |
 | NULL        | 103      |
 
-## 6. CROSS JOIN
+## 5. CROSS JOIN
 **Description:** Returns the Cartesian product of the two tables. All possible combinations of rows from both tables are included.
 
 **Example:**
@@ -312,7 +312,7 @@ CROSS JOIN orders;
 | 2           | 102      |
 | 2           | 103      |
 
-## 7. SELF JOIN
+## 6. SELF JOIN
 **Description:** A join where a table is joined with itself to combine rows with other rows from the same table.
 
 **Example:**
